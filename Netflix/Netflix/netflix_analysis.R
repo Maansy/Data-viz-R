@@ -127,9 +127,89 @@ View(TV_show_summrize)
 
 ggplot(data = TV_show_summrize , aes(x = reorder(country , -number) , y = number))+
   geom_col()+
-  labs("Top 10 TV Shows country")+
+  labs(title = "Top 10 TV Shows country")+
   xlab("County")+
   ylab("number of TV Shows")+
   theme(panel.background = element_blank(),
         axis.text.x = element_text(15, angle = 45))
-  
+
+#the directors turn
+directors <- netflix %>%
+  group_by(director) %>%
+  filter(director != "") %>%
+  summarise(number = n()) %>%
+  arrange(desc(number)) %>%
+  slice(1:20)
+
+View(directors)
+
+ggplot(data = directors , aes(x= reorder(director, -number) , y = number))+
+  geom_col() +
+  labs(title = "The Top 20 Directors")+
+  xlab("Director")+
+  ylab("Number of works")+
+  theme(panel.background = element_blank(),
+        axis.text.x = element_text(15,angle = 90))
+
+#which year has most release
+netflix_years <- netflix %>%
+  filter(release_year >= 2010) %>%
+  group_by(release_year) %>%
+  summarise(number= n()) %>%
+  arrange()%>%
+  select(number , release_year)
+    
+#group_by(release_year) %>%
+  #arrange() %>%
+  #summarize()
+
+View(netflix_years)
+
+ggplot(data=netflix_years, aes(x=reorder(release_year , -release_year) , y = number))+
+  geom_col() +
+  labs(title = "Which year had more Movies and TV Shows") +
+  xlab("Release Year")+
+  ylab("Count")+
+  theme(panel.background = element_blank())
+
+
+#rating
+ggplot(data=netflix,aes(x=rating, fill=type))+geom_bar(position=position_dodge())+
+  labs(title='Ratings - Movies vs TV Shows')+
+  xlab("Rating")+
+  ylab("Count")+
+  theme(panel.background = element_blank())+
+  scale_fill_manual(breaks =c("Movie","TV Show"),
+                    values=c("navy blue", "light blue"))
+
+#tv duration
+duration_movies<-netflix%>%
+  filter(type=='TV Show')%>%
+  group_by(release_year)%>%
+  summarise(across(c(duration)))
+
+
+ggplot(duration_movies,aes(x=release_year, y = duration)) +
+  geom_point(col = 'dark blue') +
+  labs(title = 'Duration of TV Shows Over the Years') +
+  xlab('Year')+
+  ylab('Duration')+
+  theme(panel.background =element_blank()
+        ,axis.text.x = element_text(20,angle=90))
+
+netflix%>%
+  filter(release_year >= 2010)%>%
+  filter(type=='TV Show')%>%
+  group_by(release_year)%>%
+  summarise(across(c(duration)))%>%
+  ggplot(aes(x=release_year, y = duration)) +geom_col(fill = 'dark blue') +
+  labs(title = 'Duration of TV Shows in Recent Years') +
+  xlab('Year')+
+  ylab('Duration')+
+  theme(panel.background =element_blank()
+        ,plot.title = element_text(40)
+        ,axis.text.x = element_text(20,angle=90)
+        ,axis.text.y = element_text(20)
+        ,axis.title.x = element_text(30)
+        ,axis.title.y = element_text(30)) + 
+  facet_wrap(~release_year)
